@@ -1,9 +1,67 @@
-# Test your FastAPI endpoints
+### Test de la API de Usuarios
 
-GET http://127.0.0.1:8000/
-Accept: application/json
-###
+### Crear un nuevo usuario
+POST http://localhost:8000/users/
+Content-Type: application/json
 
-GET http://127.0.0.1:8000/hello/User
+{
+  "name": "Juan Pérez",
+  "email": "juan@example.com",
+  "age": 30,
+  "password": "password123"
+}
+
+### Obtener todos los usuarios
+GET http://localhost:8000/users/
 Accept: application/json
-###
+
+### Obtener un usuario específico por ID
+GET http://localhost:8000/users/1
+Accept: application/json
+
+### Actualizar un usuario
+PUT http://localhost:8000/users/1
+Content-Type: application/json
+
+{
+  "name": "Juan Pérez Actualizado",
+  "age": 31
+}
+
+### Hacer un usuario Premium
+PATCH http://localhost:8000/users/1/premium
+Content-Type: application/json
+
+{}
+
+### Obtener usuarios inactivos
+GET http://localhost:8000/users/inactive
+Accept: application/json
+
+### Obtener usuarios premium
+GET http://localhost:8000/users/premium
+Accept: application/json
+
+### Obtener usuarios premium inactivos
+GET http://localhost:8000/users/premium?inactive=true
+Accept: application/json
+
+### Crear un usuario con estado inactivo
+POST http://localhost:8000/users/
+Content-Type: application/json
+
+{
+  "name": "María López",
+  "email": "maria@example.com",
+  "age": 25,
+  "password": "password456",
+  "status": "inactive"
+}
+
+### Cambiar estado de un usuario a inactivo
+PUT http://localhost:8000/users/1
+Content-Type: application/json
+
+{
+  "status": "inactive"
+}
