@@ -1,67 +1,41 @@
-### Test de la API de Usuarios
+### Variables
+@baseUrl = http://localhost:8000
+
+### Comprobar que la API está funcionando
+GET {{baseUrl}}/
+Accept: application/json
 
 ### Crear un nuevo usuario
-POST http://localhost:8000/users/
+POST {{baseUrl}}/users/
 Content-Type: application/json
 
 {
-  "name": "Juan Pérez",
-  "email": "juan@example.com",
-  "age": 30,
-  "password": "password123"
+  "username": "test_user",
+  "email": "test@example.com",
+  "password": "secure_password123",
+  "is_active": true,
+  "is_premium": false
 }
 
 ### Obtener todos los usuarios
-GET http://localhost:8000/users/
+GET {{baseUrl}}/users/
 Accept: application/json
 
-### Obtener un usuario específico por ID
-GET http://localhost:8000/users/1
-Accept: application/json
-
-### Actualizar un usuario
-PUT http://localhost:8000/users/1
-Content-Type: application/json
-
-{
-  "name": "Juan Pérez Actualizado",
-  "age": 31
-}
-
-### Hacer un usuario Premium
-PATCH http://localhost:8000/users/1/premium
-Content-Type: application/json
-
-{}
-
-### Obtener usuarios inactivos
-GET http://localhost:8000/users/inactive
+### Obtener usuarios activos
+GET {{baseUrl}}/users/?active=true
 Accept: application/json
 
 ### Obtener usuarios premium
-GET http://localhost:8000/users/premium
+GET {{baseUrl}}/users/?premium=true
 Accept: application/json
 
-### Obtener usuarios premium inactivos
-GET http://localhost:8000/users/premium?inactive=true
+### Obtener un usuario específico (reemplazar {user_id} con un ID válido)
+GET {{baseUrl}}/users/1
 Accept: application/json
 
-### Crear un usuario con estado inactivo
-POST http://localhost:8000/users/
-Content-Type: application/json
+### Obtener usuario con sus tareas (reemplazar {user_id} con un ID válido)
+GET {{baseUrl}}/users/1/details
+Accept: application/json
 
-{
-  "name": "María López",
-  "email": "maria@example.com",
-  "age": 25,
-  "password": "password456",
-  "status": "inactive"
-}
-
-### Cambiar estado de un usuario a inactivo
-PUT http://localhost:8000/users/1
-Content-Type: application/json
-
-{
-  "status": "inactive"
-}
+### Actualizar un usuario (reemplazar {user_id} con un ID válido)
+PUT

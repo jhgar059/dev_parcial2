@@ -1,41 +1,113 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 from datetime import datetime
-from enum import Enum
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, List
 
-class UserStatus(str, Enum):
-    ACTIVE = "active"
-    INACTIVE = "inactive"
+Base = declarative_base()
 
-class UserType(str, Enum):
-    REGULAR = "regular"
-    PREMIUM = "premium"
 
+# SQLAlchemy Models
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, index=True, nullable=False)
+    email = Column(String(100), unique=True, index=True, nullable=False)
+    password = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True)
+    is_premium = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationship with Task model
+    tasks = relationship("Task", back_populates="owner", cascade="all, delete-orphan")
+
+
+class Task(Base):
+    __tablename__ = "tasks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(100), nullable=False)
+    description = Column(String(500))
+    completed = Column(Boolean, default=False)
+    priority = Column(Integer, default=1)  # 1 (low) to 5 (high)
+    due_date = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Foreign key relationship
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    # Relationship with User model
+    owner = relationship("User", back_populates="tasks")
+
+
+# Pydantic Models for API requests/responses
+
+# User schemas
 class UserBase(BaseModel):
-    name: str = Field(..., description="Nombre del usuario")
-    email: str = Field(..., description="Correo electrónico del usuario")
-    age: int = Field(..., description="Edad del usuario")
-    status: UserStatus = Field(default=UserStatus.ACTIVE, description="Estado del usuario")
-    user_type: UserType = Field(default=UserType.REGULAR, description="Tipo de usuario")
+    username: str
+    email: EmailStr
+    is_active: bool = True
+    is_premium: bool = False
+
 
 class UserCreate(UserBase):
-    password: str = Field(..., description="Contraseña del usuario")
+    password: str
+
 
 class UserUpdate(BaseModel):
-    name: Optional[str] = None
-    email: Optional[str] = None
-    age: Optional[int] = None
-    status: Optional[UserStatus] = None
-    user_type: Optional[UserType] = None
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
     password: Optional[str] = None
+    is_active: Optional[bool] = None
+    is_premium: Optional[bool] = None
+
 
 class UserResponse(UserBase):
-    id: int = Field(..., description="ID único del usuario")
-    created_at: datetime = Field(..., description="Fecha de creación")
-    updated_at: Optional[datetime] = Field(None, description="Fecha de última actualización")
+    id: int
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         orm_mode = True
 
-class MakePremiumRequest(BaseModel):
-    user_type: UserType = Field(UserType.PREMIUM, description="Actualiza el usuario a premium")
+
+# Task schemas
+class TaskBase(BaseModel):
+    title: str
+    description: Optional[str] = None
+    completed: bool = False
+    priority: int = Field(1, ge=1, le=5)
+    due_date: Optional[datetime] = None
+
+
+class TaskCreate(TaskBase):
+    pass
+
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    completed: Optional[bool] = None
+    priority: Optional[int] = Field(None, ge=1, le=5)
+    due_date: Optional[datetime] = None
+
+
+class TaskResponse(TaskBase):
+    id: int
+    user_id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class UserWithTasks(UserResponse):
+    tasks: List[TaskResponse] = []
+
+    class Config:
+        orm_mode = True
